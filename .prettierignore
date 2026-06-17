@@ -8,3 +8,6 @@ bun.lockb
 # Miscellaneous
 /static/
 /drizzle/
+
+# Design handoff (reference prototype — not our code)
+/design_handoff_tennis_scheduler/
