@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 
 	type Props = {
-		kind?: 'primary' | 'ink' | 'white' | 'ghost';
+		kind?: 'primary' | 'ink' | 'white' | 'ghost' | 'danger';
 		sm?: boolean;
 		href?: string;
 		type?: 'button' | 'submit';

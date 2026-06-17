@@ -1,6 +1,13 @@
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { match, user, type Match, type SlotEntry } from '$lib/server/db/schema';
+import {
+	match,
+	matchMessage,
+	matchResult,
+	user,
+	type Match,
+	type SlotEntry
+} from '$lib/server/db/schema';
 import { locById, playerById, colorForId, isoIn } from '$lib/data';
 import type { ResolvedMatch, ResolvedPlayer } from '$lib/types';
 
@@ -130,6 +137,31 @@ export async function leaveSlot(
 	const slots = m.slots.slice();
 	slots[idx] = null;
 	await db.update(match).set({ slots }).where(eq(match.id, id));
+	return 'ok';
+}
+
+/**
+ * Delete a match. Only the host (slot 0) may delete, and only while no result has been
+ * reported. The match's chat is removed alongside it.
+ */
+export async function deleteMatch(
+	id: string,
+	userId: string
+): Promise<'ok' | 'not-found' | 'not-host' | 'has-result'> {
+	const m = await getMatch(id);
+	if (!m) return 'not-found';
+
+	const host = m.slots[0];
+	if (!host || host.type !== 'user' || host.id !== userId) return 'not-host';
+
+	const results = await db
+		.select({ id: matchResult.id })
+		.from(matchResult)
+		.where(eq(matchResult.matchId, id));
+	if (results.length > 0) return 'has-result';
+
+	await db.delete(matchMessage).where(eq(matchMessage.matchId, id));
+	await db.delete(match).where(eq(match.id, id));
 	return 'ok';
 }
 

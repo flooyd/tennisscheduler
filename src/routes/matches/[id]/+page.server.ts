@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getMatch, resolveMatches, claimSlot, leaveSlot } from '$lib/server/matches';
+import { getMatch, resolveMatches, claimSlot, leaveSlot, deleteMatch } from '$lib/server/matches';
 import { reliabilityMap, reportResult, getResult } from '$lib/server/standings';
 import { listMessages, postMessage } from '$lib/server/chat';
 import { canReportResultNow, resultsOpenAt } from '$lib/data';
@@ -37,7 +37,9 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
 			: null,
 		canReport: match.youIn && windowOpen,
 		reportOpensAt:
-			match.youIn && !windowOpen ? resultsOpenAt(match.date, match.time).toISOString() : null
+			match.youIn && !windowOpen ? resultsOpenAt(match.date, match.time).toISOString() : null,
+		// The host can delete the match only while no result has been reported.
+		canDelete: match.isHosting && result === null
 	};
 };
 
@@ -113,5 +115,18 @@ export const actions: Actions = {
 			noShows
 		});
 		return { toast: 'Result recorded — ladder updated.' };
+	},
+
+	deleteMatch: async ({ params, locals }) => {
+		if (!locals.user) redirect(302, '/signin');
+		const res = await deleteMatch(params.id, locals.user.id);
+		if (res === 'ok') redirect(303, '/mine');
+		const toast =
+			res === 'not-host'
+				? 'Only the host can delete this match.'
+				: res === 'has-result'
+					? 'This match has a posted result and can’t be deleted.'
+					: 'Match not found.';
+		return fail(400, { toast });
 	}
 };

@@ -6,6 +6,7 @@
 	import SlotCard from '$lib/components/SlotCard.svelte';
 	import ResultPanel from '$lib/components/ResultPanel.svelte';
 	import MatchChat from '$lib/components/MatchChat.svelte';
+	import DeleteMatch from '$lib/components/DeleteMatch.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -69,6 +70,10 @@
 			/>
 
 			<MatchChat messages={data.messages} canPost={m.youIn} />
+
+			{#if m.isHosting}
+				<DeleteMatch canDelete={data.canDelete} />
+			{/if}
 		</section>
 
 		<aside class="section">
