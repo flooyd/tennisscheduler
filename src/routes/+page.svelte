@@ -10,6 +10,9 @@
 
 	let firstName = $derived(data.user?.name.split(' ')[0] ?? null);
 
+	let mobileMenu = $state(false); // logged-out hamburger panel
+	let navRoot = $state<HTMLElement>();
+
 	const roadmap = [
 		'Recurring weekly matches',
 		'Calendar sync',
@@ -28,13 +31,39 @@
 	/>
 </svelte:head>
 
+<svelte:window
+	onclick={(e) => {
+		if (navRoot && !navRoot.contains(e.target as Node)) mobileMenu = false;
+	}}
+/>
+
 {#if !data.user}
-	<header class="home-nav">
+	<header class="home-nav" bind:this={navRoot}>
 		<a class="nav-logo" href="/"><Logo /></a>
 		<div class="home-nav-right">
 			<a class="link" href="/signin">Sign in</a>
 			<Btn kind="primary" sm href="/signin?mode=signup">Get started</Btn>
 		</div>
+
+		<button
+			type="button"
+			class="nav-burger"
+			class:open={mobileMenu}
+			aria-label="Menu"
+			aria-expanded={mobileMenu}
+			onclick={() => (mobileMenu = !mobileMenu)}
+		>
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+
+		{#if mobileMenu}
+			<div class="nav-mobile">
+				<a href="/signin">Sign in</a>
+				<a class="nav-mobile-new" href="/signin?mode=signup">Get started</a>
+			</div>
+		{/if}
 	</header>
 {/if}
 
@@ -394,6 +423,13 @@
 		display: flex;
 		align-items: center;
 		gap: 16px;
+	}
+
+	/* Collapse into the shared hamburger (.nav-burger appears at <=860px). */
+	@media (max-width: 860px) {
+		.home-nav-right {
+			display: none;
+		}
 	}
 
 	.hero-eyebrow {
