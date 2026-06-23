@@ -1,634 +1,446 @@
 <script lang="ts">
-	import { fmtDate, fmtTime } from '$lib/data';
 	import Btn from '$lib/components/Btn.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import CourtSvg from '$lib/components/CourtSvg.svelte';
-	import MatchCard from '$lib/components/MatchCard.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	let firstName = $derived(data.user?.name.split(' ')[0] ?? null);
-
-	let mobileMenu = $state(false); // logged-out hamburger panel
-	let navRoot = $state<HTMLElement>();
-
-	const roadmap = [
-		'Recurring weekly matches',
-		'Calendar sync',
-		'Weather-aware reminders',
-		'Waitlists & auto-promote',
-		'Clubs & group play',
-		'Maps & directions'
-	];
 </script>
 
 <svelte:head>
-	<title>Tennis Scheduler — find your next match</title>
+	<title>Tennis Scheduler — never miss a match</title>
 	<meta
 		name="description"
-		content="Post an open court, fill the empty spots, and find level-matched tennis players near you — singles or doubles, any time you want to play."
+		content="Post an open court, fill the empty spots, and find level-matched tennis players near you. Pickup tennis, organized — and always free to start."
 	/>
 </svelte:head>
 
-<svelte:window
-	onclick={(e) => {
-		if (navRoot && !navRoot.contains(e.target as Node)) mobileMenu = false;
-	}}
-/>
+<div class="hp" class:guest={!data.user}>
+	{#if !data.user}
+		<header class="hp-nav">
+			<a class="hp-logo" href="/" aria-label="Tennis Scheduler home"><Logo light /></a>
+			<nav class="hp-nav-right">
+				<a class="hp-signin" href="/signin">Sign in</a>
+				<Btn kind="primary" sm href="/signin?mode=signup">Get started</Btn>
+			</nav>
+		</header>
+	{/if}
 
-{#if !data.user}
-	<header class="home-nav" bind:this={navRoot}>
-		<a class="nav-logo" href="/"><Logo /></a>
-		<div class="home-nav-right">
-			<a class="link" href="/signin">Sign in</a>
-			<Btn kind="primary" sm href="/signin?mode=signup">Get started</Btn>
-		</div>
+	<main class="stage">
+		<CourtSvg class="stage-court" surround="#155e92" court="#2f8fc6" lineOp={0.42} ball={false} />
+		<div class="stage-veil" aria-hidden="true"></div>
 
-		<button
-			type="button"
-			class="nav-burger"
-			class:open={mobileMenu}
-			aria-label="Menu"
-			aria-expanded={mobileMenu}
-			onclick={() => (mobileMenu = !mobileMenu)}
+		<!-- decorative serve arc + floating balls -->
+		<svg
+			class="stage-arc"
+			viewBox="0 0 1200 520"
+			preserveAspectRatio="xMidYMid meet"
+			aria-hidden="true"
 		>
-			<span></span>
-			<span></span>
-			<span></span>
-		</button>
+			<path d="M40 470 C 360 60, 840 60, 1160 360" />
+		</svg>
+		<span class="floatball fb1" aria-hidden="true"></span>
+		<span class="floatball fb2" aria-hidden="true"></span>
 
-		{#if mobileMenu}
-			<div class="nav-mobile">
-				<a href="/signin">Sign in</a>
-				<a class="nav-mobile-new" href="/signin?mode=signup">Get started</a>
-			</div>
-		{/if}
-	</header>
-{/if}
-
-<main class="page home">
-	<section class="hero card-blue">
-		<CourtSvg class="hero-court" lineOp={0.5} ball={false} />
-		<div class="hero-inner">
-			<span class="hero-eyebrow">
-				{firstName ? `Welcome back, ${firstName}` : 'Pickup tennis, organized'}
+		<div class="stage-inner">
+			<span class="eyebrow">
+				<span class="eyebrow-dot" aria-hidden="true"></span>
+				{firstName ? 'Good to see you again' : 'Pickup tennis, organized'}
 			</span>
-			<h1 class="disp hero-title">Never miss a match.</h1>
-			<p class="hero-sub">
-				Post an open court, fill the empty spots, and find level-matched players near you — singles
-				or doubles, any time you want to play.
+
+			<h1 class="disp hl">
+				{#if firstName}
+					<span class="hl-line">Game on,</span>
+					<span class="hl-line">
+						<span class="hl-accent">{firstName}</span><span class="hl-ball" aria-hidden="true">
+							<svg viewBox="0 0 24 24"
+								><circle
+									cx="12"
+									cy="12"
+									r="11"
+									fill="var(--ball)"
+									stroke="var(--ball-deep)"
+									stroke-width="1.5"
+								/><path
+									d="M4 5 C 10 9, 10 15, 4 19"
+									fill="none"
+									stroke="#fff"
+									stroke-width="1.6"
+								/><path
+									d="M20 5 C 14 9, 14 15, 20 19"
+									fill="none"
+									stroke="#fff"
+									stroke-width="1.6"
+								/></svg
+							>
+						</span>
+					</span>
+				{:else}
+					<span class="hl-line">Never miss</span>
+					<span class="hl-line">
+						a <span class="hl-accent">match</span><span class="hl-ball" aria-hidden="true">
+							<svg viewBox="0 0 24 24"
+								><circle
+									cx="12"
+									cy="12"
+									r="11"
+									fill="var(--ball)"
+									stroke="var(--ball-deep)"
+									stroke-width="1.5"
+								/><path
+									d="M4 5 C 10 9, 10 15, 4 19"
+									fill="none"
+									stroke="#fff"
+									stroke-width="1.6"
+								/><path
+									d="M20 5 C 14 9, 14 15, 20 19"
+									fill="none"
+									stroke="#fff"
+									stroke-width="1.6"
+								/></svg
+							>
+						</span>
+					</span>
+				{/if}
+			</h1>
+
+			<p class="sub">
+				{#if firstName}
+					Your court is waiting. Line up your next hit, claim an open spot, and get back on the
+					baseline.
+				{:else}
+					Post an open court, fill the empty spots, and find level-matched players near you —
+					singles or doubles, any time you want to play.
+				{/if}
 			</p>
-			{#if data.next}
-				<p class="hero-next">
-					Your next match:
-					<strong>{fmtDate(data.next.date)} at {fmtTime(data.next.time)}</strong> · {data.next
-						.location.name}
-				</p>
-			{/if}
-			<div class="hero-actions">
+
+			<div class="cta">
 				{#if data.user}
 					<Btn kind="primary" href="/dashboard">Go to dashboard</Btn>
 					<Btn kind="white" href="/create">Schedule a match</Btn>
 				{:else}
 					<Btn kind="primary" href="/signin?mode=signup">Get started — it’s free</Btn>
-					<Btn kind="white" href="#open">See open matches</Btn>
+					<Btn kind="white" href="/signin">Sign in</Btn>
 				{/if}
 			</div>
 		</div>
-	</section>
-
-	<section class="stats">
-		<div class="stat">
-			<span class="stat-num">{data.stats.openSlots}</span>
-			<span class="stat-label">Open spots to claim</span>
-		</div>
-		<div class="stat">
-			<span class="stat-num">{data.stats.upcoming}</span>
-			<span class="stat-label">Upcoming matches</span>
-		</div>
-		<div class="stat">
-			<span class="stat-num">{data.stats.players}</span>
-			<span class="stat-label">Players in the mix</span>
-		</div>
-		<div class="stat">
-			<span class="stat-num">{data.stats.ntrpLow.toFixed(1)}–{data.stats.ntrpHigh.toFixed(1)}</span>
-			<span class="stat-label">NTRP levels welcome</span>
-		</div>
-	</section>
-
-	<section class="section">
-		<div class="section-head">
-			<h2 class="disp section-title">Everything you need to get on court</h2>
-		</div>
-		<div class="feature-grid">
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<rect x="3" y="5" width="18" height="16" rx="2" />
-						<line x1="3" y1="9" x2="21" y2="9" />
-						<line x1="8" y1="3" x2="8" y2="6" />
-						<line x1="16" y1="3" x2="16" y2="6" />
-						<line x1="12" y1="13" x2="12" y2="17" />
-						<line x1="10" y1="15" x2="14" y2="15" />
-					</svg>
-				</span>
-				<h3>Post in seconds</h3>
-				<p>Pick a venue, date and level, and your open court is live for players to join.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<circle cx="12" cy="12" r="9" />
-						<path d="M8 12.5l2.5 2.5 5-5.5" />
-					</svg>
-				</span>
-				<h3>Claim open spots</h3>
-				<p>See a match that fits? Grab an empty slot in one tap and you’re on the roster.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<line x1="6" y1="20" x2="6" y2="13" />
-						<line x1="12" y1="20" x2="12" y2="8" />
-						<line x1="18" y1="20" x2="18" y2="4" />
-					</svg>
-				</span>
-				<h3>Level-matched play</h3>
-				<p>Every match sets an NTRP range, so you’re always paired with players your speed.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<circle cx="8" cy="9" r="3" />
-						<circle cx="16" cy="9" r="3" />
-						<path d="M3 19c0-2.8 2.2-4.5 5-4.5s5 1.7 5 4.5" />
-						<path d="M13 19c0-2.8 2.2-4.5 5-4.5s3 1 3 2.8" />
-					</svg>
-				</span>
-				<h3>Singles &amp; doubles</h3>
-				<p>Host a one-on-one or rally a foursome — the roster sizes itself to the format.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z" />
-						<circle cx="12" cy="10" r="2.5" />
-					</svg>
-				</span>
-				<h3>Know the venue</h3>
-				<p>Court count, surface and area are baked into every listing — no guesswork.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<line x1="8" y1="7" x2="20" y2="7" />
-						<line x1="8" y1="12" x2="20" y2="12" />
-						<line x1="8" y1="17" x2="20" y2="17" />
-						<circle cx="4" cy="7" r="1.3" fill="currentColor" stroke="none" />
-						<circle cx="4" cy="12" r="1.3" fill="currentColor" stroke="none" />
-						<circle cx="4" cy="17" r="1.3" fill="currentColor" stroke="none" />
-					</svg>
-				</span>
-				<h3>Stay organized</h3>
-				<p>Hosting and playing matches live together, so you always know where to be next.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<path d="M7 4h10v3a5 5 0 0 1-10 0z" />
-						<path d="M7 5H4v1a3 3 0 0 0 3 3" />
-						<path d="M17 5h3v1a3 3 0 0 1-3 3" />
-						<path d="M10 16h4v4h-4z" />
-						<line x1="8" y1="20" x2="16" y2="20" />
-					</svg>
-				</span>
-				<h3>Rankings ladder</h3>
-				<p>Report results after you play. Wins earn points and the ladder updates automatically.</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.2A8 8 0 1 1 21 12z" />
-						<line x1="9" y1="11" x2="15" y2="11" />
-						<line x1="9" y1="14.5" x2="13" y2="14.5" />
-					</svg>
-				</span>
-				<h3>Match group chat</h3>
-				<p>
-					Sort out court numbers, balls and timing with the other players — right inside the match.
-				</p>
-			</div>
-			<div class="feature card">
-				<span class="feature-ic">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-					>
-						<path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" />
-						<path d="M9 12l2 2 4-4" />
-					</svg>
-				</span>
-				<h3>Reliability score</h3>
-				<p>Players who show up build a high score — so you know who you can count on for a hit.</p>
-			</div>
-		</div>
-	</section>
-
-	<section class="section">
-		<div class="section-head">
-			<h2 class="disp section-title">How it works</h2>
-		</div>
-		<div class="steps">
-			<div class="step">
-				<span class="step-num">1</span>
-				<div>
-					<strong>Find or post</strong>
-					<p>Browse open matches near you, or post your own court in under a minute.</p>
-				</div>
-			</div>
-			<div class="step">
-				<span class="step-num">2</span>
-				<div>
-					<strong>Claim your spot</strong>
-					<p>Tap an open slot to lock in. The host and other players see you instantly.</p>
-				</div>
-			</div>
-			<div class="step">
-				<span class="step-num">3</span>
-				<div>
-					<strong>Show up &amp; play</strong>
-					<p>Get the venue, time and level up front — just bring your racquet.</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="section" id="open">
-		<div class="section-head">
-			<h2 class="disp section-title">
-				Open matches right now
-				{#if data.stats.openSlots > 0}<span class="count-pill">{data.stats.openSlots} spots</span
-					>{/if}
-			</h2>
-			<a class="link" href={data.user ? '/search' : '/signin'}>
-				{data.user ? 'Browse all' : 'Sign in to claim'}
-			</a>
-		</div>
-		{#if data.preview.length > 0}
-			<div class="match-list">
-				{#each data.preview as m (m.id)}<MatchCard {m} />{/each}
-			</div>
-			{#if !data.user}
-				<p class="mc-meta open-hint">Sign in to view full details and claim your spot.</p>
-			{/if}
-		{:else}
-			<p class="mc-meta">
-				No open matches right now —
-				{#if data.user}<a class="link" href="/create">post the first one</a>.{:else}<a
-						class="link"
-						href="/signin">sign in to post the first one</a
-					>.{/if}
-			</p>
-		{/if}
-	</section>
-
-	<section class="section">
-		<div class="section-head">
-			<h2 class="disp section-title">On the roadmap</h2>
-		</div>
-		<p class="roadmap-intro">Ideas we’re exploring to make pickup tennis even easier:</p>
-		<div class="chips">
-			{#each roadmap as r (r)}<span class="chip">{r}</span>{/each}
-		</div>
-	</section>
-
-	<section class="cta card-blue">
-		<CourtSvg class="hero-court" lineOp={0.4} />
-		<div class="cta-inner">
-			<h2 class="disp cta-title">{firstName ? `Game on, ${firstName}.` : 'Ready to hit?'}</h2>
-			<p class="cta-sub">
-				Join the players already filling courts this week. Posting and claiming matches is always
-				free.
-			</p>
-			<div class="hero-actions">
-				{#if data.user}
-					<Btn kind="primary" href="/create">Schedule a match</Btn>
-				{:else}
-					<Btn kind="primary" href="/signin?mode=signup">Create your free account</Btn>
-				{/if}
-			</div>
-		</div>
-	</section>
-</main>
-
-<footer class="home-foot">
-	<Logo />
-	<span class="foot-tag">Pickup tennis, organized.</span>
-	<nav class="foot-links">
-		<a class="link" href="#open">Open matches</a>
-		{#if data.user}
-			<a class="link" href="/dashboard">Dashboard</a>
-			<a class="link" href="/create">Schedule</a>
-		{:else}
-			<a class="link" href="/signin">Sign in</a>
-		{/if}
-	</nav>
-</footer>
+	</main>
+</div>
 
 <style>
-	.home-nav {
-		position: sticky;
-		top: 0;
-		z-index: 50;
+	/* Fill exactly the space the layout leaves us — own nav (guest) or TopNav (signed
+	   in) sits above; flex:1 against the 100vh app-root gives a true single screen. */
+	.hp {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		background: var(--blue-deep);
+	}
+
+	/* ---------- floating guest nav ---------- */
+	.hp-nav {
+		position: relative;
+		z-index: 3;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
-		padding: 0 28px;
-		height: 64px;
-		background: #fff;
-		border-bottom: 2px solid var(--line);
+		padding: 18px 28px;
 	}
-	.home-nav-right {
+	.hp-logo {
+		display: inline-flex;
+		text-decoration: none;
+	}
+	.hp-nav-right {
 		display: flex;
 		align-items: center;
-		gap: 16px;
+		gap: 18px;
 	}
-
-	/* Collapse into the shared hamburger (.nav-burger appears at <=860px). */
-	@media (max-width: 860px) {
-		.home-nav-right {
-			display: none;
-		}
-	}
-
-	.hero-eyebrow {
-		display: inline-block;
-		font-weight: 800;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		font-size: 12px;
-		color: var(--ball);
-		margin-bottom: 10px;
-	}
-	.hero-next {
-		margin: 14px 0 0;
-		font-weight: 600;
-		font-size: 14.5px;
-		color: rgba(255, 255, 255, 0.95);
-	}
-	.hero-next strong {
-		color: var(--ball);
-		font-style: italic;
-	}
-
-	.stats {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 12px;
-		margin-top: 18px;
-	}
-	.stat {
-		background: #fff;
-		border: 2px solid var(--line);
-		border-radius: var(--radius);
-		padding: 18px 20px;
-	}
-	.stat-num {
-		display: block;
-		font-weight: 850;
-		font-style: italic;
-		font-size: 30px;
-		line-height: 1;
-		color: var(--blue-deep);
-	}
-	.stat-label {
-		display: block;
-		margin-top: 7px;
+	.hp-signin {
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		font-size: 11px;
-		color: var(--ink-50);
+		font-size: 13px;
+		color: #fff;
+		text-decoration: none;
+		opacity: 0.92;
+	}
+	.hp-signin:hover {
+		opacity: 1;
+		text-decoration: underline;
 	}
 
-	.feature-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-		gap: 12px;
-	}
-	.feature {
-		padding: 22px 22px 20px;
-	}
-	.feature-ic {
-		display: inline-flex;
+	/* ---------- the stage ---------- */
+	.stage {
+		position: relative;
+		flex: 1;
+		min-height: 0;
+		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
-		border-radius: 12px;
-		background: var(--blue-pale);
-		color: var(--blue-deep);
-		margin-bottom: 14px;
-	}
-	.feature-ic svg {
-		width: 24px;
-		height: 24px;
-	}
-	.feature h3 {
-		font-weight: 850;
-		font-style: italic;
-		text-transform: uppercase;
-		letter-spacing: -0.01em;
-		font-size: 16px;
-		margin: 0 0 6px;
-	}
-	.feature p {
-		margin: 0;
-		color: var(--ink-70);
-		font-weight: 500;
-		font-size: 14px;
+		overflow: hidden;
+		padding: 24px;
 	}
 
-	.steps {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 14px;
+	:global(.stage-court) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 0;
 	}
-	.step {
-		display: flex;
-		gap: 14px;
-		align-items: flex-start;
-		background: #fff;
-		border: 2px solid var(--line);
-		border-radius: var(--radius);
-		padding: 18px 20px;
-	}
-	.step strong {
-		display: block;
-		font-weight: 850;
-		font-style: italic;
-		text-transform: uppercase;
-		font-size: 15px;
-		margin-bottom: 4px;
-	}
-	.step p {
-		margin: 0;
-		color: var(--ink-70);
-		font-weight: 500;
-		font-size: 13.5px;
+	.stage-veil {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		/* darken the edges + lift legibility behind the centred type */
+		background:
+			radial-gradient(80% 70% at 50% 48%, rgba(8, 28, 44, 0.55) 0%, rgba(8, 28, 44, 0) 70%),
+			linear-gradient(180deg, rgba(8, 28, 44, 0.5) 0%, rgba(8, 28, 44, 0) 22%),
+			linear-gradient(0deg, rgba(8, 28, 44, 0.55) 0%, rgba(8, 28, 44, 0) 30%);
 	}
 
-	.open-hint {
-		margin-top: 12px;
+	/* decorative serve trajectory drawn behind the headline */
+	.stage-arc {
+		position: absolute;
+		z-index: 1;
+		top: 50%;
+		left: 50%;
+		width: min(1180px, 116%);
+		transform: translate(-50%, -58%);
+		pointer-events: none;
+	}
+	.stage-arc path {
+		fill: none;
+		stroke: rgba(255, 255, 255, 0.5);
+		stroke-width: 3;
+		stroke-linecap: round;
+		stroke-dasharray: 4 22;
 	}
 
-	.roadmap-intro {
-		margin: 0 0 14px;
-		color: var(--ink-70);
-		font-weight: 500;
+	.floatball {
+		position: absolute;
+		z-index: 1;
+		border-radius: 50%;
+		background: radial-gradient(
+			circle at 34% 30%,
+			#f4ff8a 0%,
+			var(--ball) 46%,
+			var(--ball-deep) 100%
+		);
+		box-shadow: 0 16px 40px rgba(8, 28, 44, 0.4);
+		pointer-events: none;
 	}
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
+	.fb1 {
+		width: 92px;
+		height: 92px;
+		top: 13%;
+		left: 9%;
+		opacity: 0.92;
 	}
-	.chip {
-		font-weight: 700;
-		font-size: 12.5px;
-		letter-spacing: 0.02em;
-		background: #fff;
-		border: 2px solid var(--line);
-		color: var(--ink-70);
-		border-radius: 999px;
-		padding: 7px 14px;
+	.fb2 {
+		width: 54px;
+		height: 54px;
+		bottom: 14%;
+		right: 11%;
+		opacity: 0.8;
 	}
 
-	.cta {
-		margin-top: 40px;
-	}
-	.cta-inner {
+	/* ---------- centred content ---------- */
+	.stage-inner {
 		position: relative;
-		padding: 44px 44px 40px;
+		z-index: 2;
+		max-width: 880px;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
-	.cta-title {
-		font-size: clamp(28px, 4vw, 44px);
-		color: #fff;
+
+	.eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 9px;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.16em;
+		font-size: clamp(11px, 1.4vw, 13px);
+		color: var(--ball);
+		margin-bottom: 22px;
 	}
-	.cta-sub {
-		margin: 10px 0 22px;
-		max-width: 520px;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.95);
+	.eyebrow-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--ball);
+		box-shadow: 0 0 0 4px rgba(223, 242, 75, 0.22);
 	}
 
-	.home-foot {
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		flex-wrap: wrap;
-		padding: 22px 28px;
-		background: #fff;
-		border-top: 2px solid var(--line);
+	.hl {
+		color: #fff;
+		font-size: clamp(50px, 12vw, 148px);
+		line-height: 0.88;
+		text-shadow: 0 6px 30px rgba(8, 28, 44, 0.35);
 	}
-	.foot-tag {
-		color: var(--ink-50);
+	.hl-line {
+		display: block;
+	}
+	.hl-accent {
+		color: var(--ball);
+	}
+	.hl-ball {
+		display: inline-block;
+		width: 0.6em;
+		margin-left: 0.04em;
+		vertical-align: -0.04em;
+	}
+	.hl-ball svg {
+		width: 100%;
+		height: auto;
+		display: block;
+		filter: drop-shadow(0 5px 12px rgba(8, 28, 44, 0.4));
+	}
+
+	.sub {
+		margin: 26px 0 0;
+		max-width: 560px;
+		font-size: clamp(15px, 1.9vw, 19px);
 		font-weight: 600;
-		font-size: 13px;
+		line-height: 1.45;
+		color: rgba(255, 255, 255, 0.92);
 	}
-	.foot-links {
-		margin-left: auto;
+
+	.cta {
 		display: flex;
-		gap: 18px;
 		flex-wrap: wrap;
+		justify-content: center;
+		gap: 14px;
+		margin-top: 36px;
+	}
+	/* a touch larger than default buttons — this is the moment of the whole page */
+	.cta :global(.btn) {
+		padding: 16px 28px;
+		font-size: 14.5px;
+	}
+
+	/* ---------- entrances (skipped when reduced motion is requested) ---------- */
+	@media (prefers-reduced-motion: no-preference) {
+		.eyebrow,
+		.hl-line,
+		.sub,
+		.cta {
+			opacity: 0;
+			animation: rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+		}
+		.eyebrow {
+			animation-delay: 0.05s;
+		}
+		.hl-line:nth-child(1) {
+			animation-delay: 0.14s;
+		}
+		.hl-line:nth-child(2) {
+			animation-delay: 0.24s;
+		}
+		.sub {
+			animation-delay: 0.42s;
+		}
+		.cta {
+			animation-delay: 0.54s;
+		}
+
+		.hl-ball {
+			transform-origin: 50% 100%;
+			animation: bounce 2.6s ease-in-out 1.1s infinite;
+		}
+		.floatball {
+			animation: drift 7s ease-in-out infinite;
+		}
+		.fb2 {
+			animation-duration: 9s;
+			animation-direction: reverse;
+		}
+
+		.stage-arc path {
+			stroke-dasharray: 1500;
+			stroke-dashoffset: 1500;
+			animation: draw 2.4s ease-out 0.3s forwards;
+		}
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			transform: translateY(26px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	@keyframes bounce {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-0.16em);
+		}
+	}
+	@keyframes drift {
+		0%,
+		100% {
+			transform: translateY(0) translateX(0);
+		}
+		50% {
+			transform: translateY(-22px) translateX(10px);
+		}
+	}
+	@keyframes draw {
+		to {
+			stroke-dashoffset: 0;
+		}
 	}
 
 	@media (max-width: 760px) {
-		.home-nav {
-			padding: 0 16px;
+		.hp-nav {
+			padding: 14px 18px;
 		}
-		.stats {
-			grid-template-columns: repeat(2, 1fr);
+		/* the hero CTA already covers "get started" — keep the bar to logo + sign in */
+		.hp-nav-right :global(.btn) {
+			display: none;
 		}
-		.steps {
-			grid-template-columns: 1fr;
+		.stage {
+			padding: 20px;
 		}
-		.cta-inner {
-			padding: 30px 24px;
+		.fb1 {
+			width: 60px;
+			height: 60px;
+			top: 9%;
+			left: 6%;
+		}
+		.fb2 {
+			width: 38px;
+			height: 38px;
+		}
+		.eyebrow {
+			margin-bottom: 16px;
+		}
+		.sub {
+			margin-top: 18px;
+		}
+		/* labels are long and never wrap — stack full-width instead of clipping */
+		.cta {
+			flex-direction: column;
+			align-items: stretch;
+			width: 100%;
+			max-width: 330px;
+			margin-top: 26px;
+		}
+		.cta :global(.btn) {
+			width: 100%;
 		}
 	}
 </style>
